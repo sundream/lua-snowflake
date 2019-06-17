@@ -14,7 +14,9 @@
 #define TIMESTAMP_BIT (41)
 #define NODEID_BIT (10)
 #define SEQUENCE_BIT (12)
+#define TIMESTAMP_MASK ((1ul<<TIMESTAMP_BIT)-1)
 #define NODEID_MASK ((1<<NODEID_BIT)-1)
+#define SEQUENCE_MASK ((1<<SEQUENCE_BIT)-1)
 
 static uint64_t genTimestamp() {
     struct timeval tv;
@@ -33,15 +35,27 @@ static uint64_t genIncrement() {
     return i;
 }
 
+uint64_t getTimestampByUUID(uint64_t uuid) {
+    return (uuid >> (NODEID_BIT+SEQUENCE_BIT)) & TIMESTAMP_MASK;
+}
+
 int getNodeIdByUUID(uint64_t uuid) {
     return (uuid >> SEQUENCE_BIT) & NODEID_MASK;
+}
+
+int getSequenceByUUID(uint64_t uuid) {
+    return uuid & SEQUENCE_MASK;
+}
+
+uint64_t composeUUID(uint64_t a,uint64_t b,uint64_t c) {
+    return (a << (NODEID_BIT + SEQUENCE_BIT))
+         | (b << SEQUENCE_BIT)
+         | c;
 }
 
 uint64_t uuid(int nodeId) {
     uint64_t a = genTimestamp();
     uint64_t b = genNodeId(nodeId);
     uint64_t c = genIncrement();
-    return (a << (NODEID_BIT + SEQUENCE_BIT))
-         | (b << SEQUENCE_BIT)
-         | c;
+    return composeUUID(a,b,c);
 }
