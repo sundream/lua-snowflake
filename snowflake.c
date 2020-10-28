@@ -25,7 +25,7 @@ static uint64_t genTimestamp() {
     return (uint64_t)tv.tv_sec * 1000 + (uint64_t)tv.tv_usec / 1000;
 }
 
-static uint64_t genNodeId(nodeId) {
+static uint64_t genNodeId(int nodeId) {
     return (uint64_t) (nodeId % (1 << NODEID_BIT));
 }
 
