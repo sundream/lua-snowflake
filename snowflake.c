@@ -29,10 +29,9 @@ static uint64_t genNodeId(int nodeId) {
     return (uint64_t) (nodeId % (1 << NODEID_BIT));
 }
 
-static uint64_t genIncrement() {
-    static uint64_t i = 0;
-    i = (i + 1) & ~(1 << SEQUENCE_BIT);
-    return i;
+static uint64_t genIncrement(int* sequence) {
+    *sequence = (*sequence + 1) & ~(1 << SEQUENCE_BIT);
+    return *sequence;
 }
 
 uint64_t getTimestampByUUID(uint64_t uuid) {
@@ -53,9 +52,9 @@ uint64_t composeUUID(uint64_t a,uint64_t b,uint64_t c) {
          | c;
 }
 
-uint64_t uuid(int nodeId) {
+uint64_t uuid(int nodeId,int* sequence) {
     uint64_t a = genTimestamp();
     uint64_t b = genNodeId(nodeId);
-    uint64_t c = genIncrement();
+    uint64_t c = genIncrement(sequence);
     return composeUUID(a,b,c);
 }

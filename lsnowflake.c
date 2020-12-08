@@ -74,7 +74,8 @@ lcomposeUUID(lua_State *L) {
 static int
 luuid(lua_State *L) {
     int nodeId = luaL_checkinteger(L,1);
-    uint64_t id = uuid(nodeId);
+    int* sequence = (int*)lua_touserdata(L,lua_upvalueindex(1));
+    uint64_t id = uuid(nodeId,sequence);
 	lua_pushinteger(L, id);
     return 1;
 }
@@ -88,10 +89,14 @@ luaopen_snowflake_core(lua_State *L) {
         {"getNodeIdByUUID",lgetNodeIdByUUID},
         {"getSequenceByUUID",lgetSequenceByUUID},
         {"composeUUID",lcomposeUUID},
-        {"uuid",luuid},
         {NULL,NULL},
     };
 
-    luaL_newlib(L,l);
+    luaL_newlibtable(L,l);
+    luaL_setfuncs(L,l,0);
+    int* sequence = (int*)lua_newuserdata(L,sizeof(int));
+    *sequence = 0;
+    lua_pushcclosure(L,luuid,1);
+    lua_setfield(L,-2,"uuid");
     return 1;
 }
